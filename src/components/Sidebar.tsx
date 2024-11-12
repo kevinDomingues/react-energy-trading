@@ -1,20 +1,26 @@
-import React, { FC,  useState } from "react";
+import React, { FC,  useEffect,  useState } from "react";
 import { useAuth } from "../providers/AuthProvider";
-import { ChevronLeftIcon, ChevronRightIcon, ChartBarIcon, UsersIcon, CogIcon } from '@heroicons/react/24/solid'
+import { ChevronLeftIcon, ChevronRightIcon, ChartBarIcon, CogIcon, BoltIcon } from '@heroicons/react/24/solid'
 import { ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/outline'
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Sidebar: FC = () => {
     const [open, setOpen] = useState(true);
     const [current, setCurrent] = useState(0);
 
     const { logout } = useAuth();
+    const location = useLocation();
 
     const Menus = [
       { title: "Dashboard", icon: 1, to: "/" },
-      { title: "Certifica", icon: 2, to: "/create-certificate" },
+      { title: "Certificates", icon: 2, to: "/certificates" },
       { title: "Settings", icon: 3, gap: true, to: "/settings" },
     ];
+
+    useEffect(() => {
+      const activeIndex = Menus.findIndex(menu => menu.to === location.pathname);
+      setCurrent(activeIndex !== -1 ? activeIndex : 0);
+    }, [location.pathname]);
 
     return (
       <>
@@ -44,7 +50,7 @@ const Sidebar: FC = () => {
                     <ChartBarIcon className={`cursor-pointer w-6 text-white`} /> 
                       :
                     Menu.icon === 2 ?
-                    <UsersIcon className={`cursor-pointer w-6 text-white`} />
+                    <BoltIcon className={`cursor-pointer w-6 text-white`} />
                       :
                     <CogIcon className={`cursor-pointer w-6 text-white`} />
                   }
