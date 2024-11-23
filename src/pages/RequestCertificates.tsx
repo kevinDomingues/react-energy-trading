@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../providers/AuthProvider';
 import { apiURL } from '../constants/apiURL';
 import ReusableForm from '../components/ReusableForm';
+import CertificateModal from '../components/CertificateModal';
 
 interface CertificateItem {
   energyCertificateId: string;
@@ -34,6 +35,53 @@ const RequestCertificate: FC = () => {
   const [data, setData] = useState<CertificateItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
+  const handleBuySubmit = async (buyFormData: any) => {
+    try {
+      if (!token) {
+        setError("Unauthorized: No token found");
+        setLoading(false);
+        return;
+      }
+
+      const quantity = buyFormData.quantity;
+      const availableQuantity = data.length;
+
+
+      const purchasedQuantity = Math.min(quantity, availableQuantity);
+      if (purchasedQuantity === 0) {
+        setError("No certificates available for purchase.");
+        return;
+      }
+
+      const certificatesToBuy = data.slice(0, purchasedQuantity);
+
+      for (const certificate of certificatesToBuy) {
+        const response = await axios.post(
+          `${apiURL}/certificate/transfer`,
+          {
+            energyCertificateId: certificate.energyCertificateId
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log(response);
+      }
+    } catch (err) {
+      setError("Failed to create certificate. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+    console.log("Form data submitted:", formData);
+  };
 
   const fields = [
     {
@@ -55,15 +103,22 @@ const RequestCertificate: FC = () => {
     },
     {
       label: 'Energy Type',
-      type: 'number',
+      type: 'select',
       name: 'energyType',
       value: formData.energyType,
-      min: 1,
+      options: [
+        { label: 'Any', value: 0 },
+        { label: 'Solar', value: 1 },
+        { label: 'Wind', value: 2 },
+        { label: 'Hydro', value: 3 },
+        { label: 'Geothermal', value: 4 },
+        { label: 'Biomass', value: 5 },
+      ],
       required: true,
     },
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -83,8 +138,11 @@ const RequestCertificate: FC = () => {
         return;
       }
 
+      const urlBuilder = 
+       formData.energyType != 0 ? `${formData.usableMonth}/${formData.usableYear}/type/${formData.energyType}` : `${formData.usableMonth}/${formData.usableYear}`
+
       const response = await axios.get<CertificatesResponse>(
-        `${apiURL}/certificate/from/${formData.usableMonth}/${formData.usableYear}`,
+        `${apiURL}/certificate/from/${urlBuilder}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -130,13 +188,18 @@ const RequestCertificate: FC = () => {
         </table>
         <div className="p-4 w-full container mx-auto text-center">
           <button
-            type="submit"
+            onClick={handleOpenModal}
             disabled={loading}
             className="w-52 bg-emerald-500 text-white py-2 rounded-lg hover:bg-emerald-600 transition-colors"
           >
             Buy Certificates
           </button>
         </div>
+        <CertificateModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleBuySubmit}
+        />
       </div>
       ) : (
         <ReusableForm

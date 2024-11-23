@@ -51,15 +51,21 @@ const CreateCertificate: FC = () => {
     },
     {
       label: 'Energy Type',
-      type: 'number',
+      type: 'select',
       name: 'energyType',
       value: formData.energyType,
-      min: 1,
+      options: [
+        { label: 'Solar', value: 1 },
+        { label: 'Wind', value: 2 },
+        { label: 'Hydro', value: 3 },
+        { label: 'Geothermal', value: 4 },
+        { label: 'Biomass', value: 5 },
+      ],
       required: true,
     },
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,

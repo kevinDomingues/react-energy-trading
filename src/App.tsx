@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import './App.css'
 import AuthProvider, { useAuth } from './providers/AuthProvider'
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Sidebar from './components/Sidebar'
@@ -11,23 +11,20 @@ import OwnedCertificates from './pages/OwnedCertificates'
 import RequestCertificate from './pages/RequestCertificates'
 
 const AppRoutes: FC = ()  => {
-  const { isAuthenticated, role } = useAuth();
-  const [isBusinessAccount, setIsBusinessAccount] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsBusinessAccount(role === "2");
-  }, [role])
+  const { isAuthenticated, isBusinessAccount } = useAuth();
 
   return (
     <>
-      { isAuthenticated ? (
+      { !isAuthenticated ? (
         <div className='flex mx-auto'>
           <Sidebar />
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path='/certificates' element={<OwnedCertificates />} />
-            { isBusinessAccount && (
+            {isBusinessAccount ? (
               <Route path="/create-certificate" element={<CreateCertificate />} />
+            ) : (
+              <Route path="/create-certificate" element={<Navigate to="/" />} />
             )}
             <Route path="/request-certificate" element={<RequestCertificate />} />
           </Routes>

@@ -24,7 +24,7 @@ const Sidebar: FC = () => {
 
     return (
       <>
-        <div className={`${open ? "w-72" : "w-20" } h-screen bg-emerald-800 p-5 pt-8 relative duration-300`}>
+        <div className={`${open ? "w-72" : "w-20" } min-h-screen min-h-full bg-emerald-800 p-5 pt-8 relative duration-300`}>
           {open ? 
             <ChevronLeftIcon className={`absolute cursor-pointer -right-3 top-9 w-7 border-sky-900 bg-white text-sky-900
             border-2 rounded-full`} onClick={() => setOpen(!open)}/> 
