@@ -4,6 +4,8 @@ import { useAuth } from '../providers/AuthProvider';
 import { apiURL } from '../constants/apiURL';
 import ReusableForm from '../components/ReusableForm';
 import CertificateModal from '../components/CertificateModal';
+import { getEnergyTypeKey } from '../constants/consumptionUtils';
+import { useNavigate } from 'react-router-dom';
 
 interface CertificateItem {
   energyCertificateId: string;
@@ -13,6 +15,7 @@ interface CertificateItem {
   usableMonth: number;
   usableYear: number;
   regulatoryAuthorityID: string;
+  energyType: number;
 }
 
 interface CertificatesResponse {
@@ -26,6 +29,7 @@ interface CertificateFormData {
 }
 
 const RequestCertificate: FC = () => {
+  const navigate = useNavigate();
   const { token } = useAuth(); 
   const [formData, setFormData] = useState<CertificateFormData>({
     usableMonth: 12,
@@ -41,6 +45,7 @@ const RequestCertificate: FC = () => {
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleBuySubmit = async (buyFormData: any) => {
+    setLoading(true);
     try {
       if (!token) {
         setError("Unauthorized: No token found");
@@ -61,10 +66,12 @@ const RequestCertificate: FC = () => {
       const certificatesToBuy = data.slice(0, purchasedQuantity);
 
       for (const certificate of certificatesToBuy) {
-        const response = await axios.post(
+        await axios.post(
           `${apiURL}/certificate/transfer`,
           {
-            energyCertificateId: certificate.energyCertificateId
+            energyCertificateId: certificate.energyCertificateId,
+            quantity: parseInt(quantity),
+            availability: availableQuantity
           },
           {
             headers: {
@@ -72,15 +79,17 @@ const RequestCertificate: FC = () => {
             },
           }
         );
-
-        console.log(response);
       }
+      setLoading(false);
     } catch (err) {
       setError("Failed to create certificate. Please try again.");
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        handleCloseModal();
+        navigate("/certificates");
+      }, 1000)
     }
-    console.log("Form data submitted:", formData);
   };
 
   const fields = [
@@ -171,6 +180,7 @@ const RequestCertificate: FC = () => {
               <th className="py-2 px-4 text-left font-semibold text-gray-700">Emission Date</th>
               <th className="py-2 px-4 text-left font-semibold text-gray-700">Usable Month</th>
               <th className="py-2 px-4 text-left font-semibold text-gray-700">Usable Year</th>
+              <th className="py-2 px-4 text-left font-semibold text-gray-700">Energy Type</th>
             </tr>
           </thead>
           <tbody>
@@ -182,6 +192,7 @@ const RequestCertificate: FC = () => {
                 </td>
                 <td className="py-3 px-4">{item.usableMonth}</td>
                 <td className="py-3 px-4">{item.usableYear}</td>
+                <td className="py-3 px-4">{getEnergyTypeKey(item.energyType)}</td>
               </tr>
             ))}
           </tbody>
@@ -199,6 +210,7 @@ const RequestCertificate: FC = () => {
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           onSubmit={handleBuySubmit}
+          loading={loading}
         />
       </div>
       ) : (

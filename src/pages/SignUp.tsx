@@ -4,7 +4,7 @@ import axios from "axios";
 import { apiURL } from "../constants/apiURL";
 
 const SignUp: FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -156,7 +156,7 @@ const SignUp: FC = () => {
 
             <div className="flex items-center justify-between">
               <div className="text-sm">
-                <a className="font-medium text-gray-800 hover:text-sky-600"
+                <a className="font-medium text-gray-800 hover:text-sky-600 cursor-pointer"
                 onClick={() => setIsBusinessAccount(!isBusinessAccount)}
                 >
                   { isBusinessAccount ? "Registering a consumer account?" : "Registering a business account?" }

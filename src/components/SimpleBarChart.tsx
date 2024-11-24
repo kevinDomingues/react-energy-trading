@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ConsumptionGraphProps } from '../pages/Dashboard';
-import { transformConsumptionData, sortDataByDate, colors } from '../constants/consumptionUtils';
+import { transformConsumptionData, sortDataByDate, labelToColor, fallbackColor } from '../constants/consumptionUtils';
 
 const SimpleBarChart: FC<ConsumptionGraphProps> = ({
   data
@@ -35,8 +35,8 @@ const SimpleBarChart: FC<ConsumptionGraphProps> = ({
         <YAxis />
         <Tooltip />
         <Legend />
-        {energyKeys.map((key, index) => (
-          <Bar key={key} dataKey={key} fill={colors[index % colors.length]} />
+        {energyKeys.map((key) => (
+          <Bar key={key} dataKey={key} fill={labelToColor[key as keyof typeof labelToColor] || fallbackColor} />
         ))}
       </BarChart>
     </ResponsiveContainer>

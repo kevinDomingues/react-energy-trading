@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { ConsumptionGraphProps } from '../pages/Dashboard';
-import { colors, aggregatedData } from '../constants/consumptionUtils';
+import { aggregatedData, labelToColor, fallbackColor } from '../constants/consumptionUtils';
 
 const SimplePieChart: FC<ConsumptionGraphProps> = ({
   data
@@ -24,7 +24,7 @@ const SimplePieChart: FC<ConsumptionGraphProps> = ({
           dataKey="value"
         >
           {transformedData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            <Cell key={`cell-${index}`} fill={labelToColor[entry.name as keyof typeof labelToColor] || fallbackColor} />
           ))}
         </Pie>
         <Tooltip />

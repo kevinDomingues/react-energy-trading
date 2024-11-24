@@ -1,4 +1,13 @@
-export const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1", "#f58142"];
+export const fallbackColor = "bdbdbd";
+
+export const labelToColor = {
+    Solar: '#ffad46',
+    Wind: '#82ca9d',
+    Hydro: '#73c2fb',
+    Biomass: '#96742f',
+    Geothermal: '#4f2f06',
+    Other: '#bdbdbd',
+  }
 
 export const sortDataByDate = (data: Array<{ [key: string]: string | number }>) => {
     return data.sort((a, b) => {

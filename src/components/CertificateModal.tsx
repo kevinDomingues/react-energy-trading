@@ -4,10 +4,11 @@ import ReusableForm from './ReusableForm';
 interface CertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (formData: any) => void;  // Add appropriate type for formData if desired
+  onSubmit: (formData: any) => void;
+  loading: boolean;
 }
 
-const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit }) => {
+const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit, loading }) => {
   const [formData, setFormData] = useState({
     quantity: 1
   });
@@ -31,7 +32,6 @@ const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -50,7 +50,7 @@ const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit
           onChange={handleChange}
           error={''}
           successMessage={''}
-          loading={false}
+          loading={loading}
           buttonText="Create Certificate"
         />
       </div>

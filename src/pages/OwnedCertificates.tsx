@@ -3,6 +3,7 @@ import React, { FC, useEffect, useState } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import { apiURL } from "../constants/apiURL";
 import { Link } from "react-router-dom";
+import { getEnergyTypeKey } from "../constants/consumptionUtils";
 
 interface CertificateItem {
     energyCertificateId: string;
@@ -12,6 +13,7 @@ interface CertificateItem {
     usableMonth: number;
     usableYear: number;
     regulatoryAuthorityID: string;
+    energyType: number;
 }
 
 interface CertificatesResponse {
@@ -91,23 +93,23 @@ const OwnedCertificates: FC = () => {
           <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
             <thead>
               <tr className="bg-gray-100 border-b">
-                <th className="py-2 px-4 text-left font-semibold text-gray-700">Owner ID</th>
                 <th className="py-2 px-4 text-left font-semibold text-gray-700">Producer ID</th>
                 <th className="py-2 px-4 text-left font-semibold text-gray-700">Emission Date</th>
                 <th className="py-2 px-4 text-left font-semibold text-gray-700">Usable Month</th>
                 <th className="py-2 px-4 text-left font-semibold text-gray-700">Usable Year</th>
+                <th className="py-2 px-4 text-left font-semibold text-gray-700">Energy Type</th>
               </tr>
             </thead>
             <tbody>
               {data.map((item, index) => (
                 <tr key={index} className="hover:bg-gray-50 border-b">
-                  <td className="py-3 px-4">{item.ownerId}</td>
                   <td className="py-3 px-4">{item.producerId}</td>
                   <td className="py-3 px-4">
                     {new Date(item.emissionDate).toLocaleDateString("en-US")}
                   </td>
                   <td className="py-3 px-4">{item.usableMonth}</td>
                   <td className="py-3 px-4">{item.usableYear}</td>
+                  <td className="py-3 px-4">{getEnergyTypeKey(item.energyType)}</td>
                 </tr>
               ))}
             </tbody>

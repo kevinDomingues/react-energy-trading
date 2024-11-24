@@ -15,7 +15,7 @@ const AppRoutes: FC = ()  => {
 
   return (
     <>
-      { !isAuthenticated ? (
+      { isAuthenticated ? (
         <div className='flex mx-auto'>
           <Sidebar />
           <Routes>

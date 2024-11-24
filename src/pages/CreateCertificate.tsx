@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../providers/AuthProvider';
 import { apiURL } from '../constants/apiURL';
 import ReusableForm from '../components/ReusableForm';
+import { useNavigate } from 'react-router-dom';
 
 interface CertificateFormData {
   usableMonth: number;
@@ -12,6 +13,7 @@ interface CertificateFormData {
 }
 
 const CreateCertificate: FC = () => {
+  const navigate = useNavigate();
   const { token } = useAuth(); 
   const [formData, setFormData] = useState<CertificateFormData>({
     usableMonth: 12,
@@ -102,6 +104,9 @@ const CreateCertificate: FC = () => {
       setError("Failed to create certificate. Please try again.");
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        navigate("/certificates");
+      }, 1000)
     }
   };
 

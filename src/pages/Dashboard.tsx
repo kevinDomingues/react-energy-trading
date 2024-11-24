@@ -4,6 +4,8 @@ import { useAuth } from "../providers/AuthProvider";
 import { apiURL } from "../constants/apiURL";
 import SimpleBarChart from "../components/SimpleBarChart";
 import SimplePieChart from "../components/SimplePieChart";
+import SimpleLineChart from "../components/SimpleLineChart";
+import MoneyResume from "../components/MoneyResume";
 
 interface ConsumptionData {
   userId: string;
@@ -13,11 +15,17 @@ interface ConsumptionData {
   energyConsumed: number;
 }
 
-interface Filter {
-  userId?: string;
-  year?: number;
-  month?: number;
-  energyTypeId?: number;
+type TransactionData = {
+  fromUserId: string;
+  price: number;
+  toUserId: string;
+  tokenRef: string;
+  transactionDate: string;
+  transactionId: string;
+};
+
+export interface TransactionGraphData {
+  data: TransactionData[];
 }
 
 export interface ConsumptionGraphProps {
@@ -50,9 +58,17 @@ const consumptionDataExample = [
 
 const Dashboard: FC = () => {
     const { token, isBusinessAccount } = useAuth();
+    const [selectedYear, setSelectedYear] = useState<string>("2024");
     const [consumptionData, setConsumptionData] = useState<ConsumptionData[]>([]);
+    const [transactionData, setTransactionData] = useState<TransactionData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [transactionLoading, setTransactionLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      e.preventDefault();
+      setSelectedYear(e.target.value);
+    };
   
     useEffect(() => {
       const fetchData = async () => {
@@ -65,7 +81,7 @@ const Dashboard: FC = () => {
         setLoading(true);
   
         try {
-          const response = await axios.get<ConsumptionData[]>(`${apiURL}/consumptions/from/12/2024`, {
+          const response = await axios.get<ConsumptionData[]>(`${apiURL}/consumptions/${selectedYear}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -79,26 +95,76 @@ const Dashboard: FC = () => {
         }
       };
   
-      //fetchData();
-      setConsumptionData(consumptionDataExample);
+      fetchData();
+    }, [selectedYear]);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        if (!token) {
+            setError("Unauthorized: No token found");
+            setLoading(false);
+            return;
+          }
+    
+        setTransactionLoading(true);
+  
+        try {
+          const response = await axios.get<{response: TransactionData[]}>(`${apiURL}/certificate/${isBusinessAccount ? 'sold' : 'bought'}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          setTransactionData(response.data.response);
+        } catch (error) {
+          setError("Failed to load data");
+        } finally {
+          setTransactionLoading(false);
+        }
+      };
+  
+      fetchData();
     }, []);
   
-/*     if (loading) return <p className="text-center p-4">Loading...</p>;
-    if (error) return <p className="text-center p-4 text-red-500">{error}</p>; */
+    if (loading) return <p className="text-center p-4">Loading...</p>;
+    if (error) return <p className="text-center p-4 text-red-500">{error}</p>;
   
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-semibold mb-6 text-center">Dashboard</h1>
+
+        <div className="mb-6 flex justify-center">
+          <label htmlFor="year-select" className="mr-4 text-lg font-medium text-gray-700">
+            Select Year:
+          </label>
+          <select
+            id="year-select"
+            className="px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={selectedYear}
+            onChange={handleYearChange}
+          >
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+          </select>
+        </div>
+
         <div className="overflow-x-auto">
           <div className="min-h-screen">
             <main className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 <div className="bg-white shadow rounded-lg p-6">
                   <h2 className="text-lg font-semibold text-gray-700 mb-4">
-                    Energy consumption 
+                    {isBusinessAccount ? "Sales" : "Energy consumption" } 
                   </h2>
-                  <div className="h-64 flex justify-center items-center border border-dashed border-gray-300 rounded">
-                    <p className="text-gray-400">Placeholder for Chart 1</p>
+                  <div className="h-64 flex justify-center items-center border-gray-300 rounded">
+                  {transactionData && !transactionLoading ? (
+                        <MoneyResume data={transactionData} />
+                      ) : 
+                      (
+                        <p className="text-gray-400">No data to show</p>
+                      )
+                    }
                   </div>
                 </div>
 
@@ -106,26 +172,44 @@ const Dashboard: FC = () => {
                   <h2 className="text-lg font-semibold text-gray-700 mb-4">
                     Certificates type
                   </h2>
-                  <div className="h-64 flex justify-center items-center border border-dashed border-gray-300 rounded">
-                    <SimplePieChart data={consumptionData} />
+                  <div className="h-64 flex justify-center items-center border-gray-300 rounded">
+                    {consumptionData ? (
+                        <SimplePieChart data={consumptionData} />
+                      ) : 
+                      (
+                        <p className="text-gray-400">No data to show</p>
+                      )
+                    }
                   </div>
                 </div>
 
                 <div className="bg-white shadow rounded-lg p-6 col-span-1 md:col-span-2">
                   <h2 className="text-lg font-semibold text-gray-700 mb-4">
-                    Consumption by month
+                    {isBusinessAccount ? "Sales" : "Consumption"} by month
+                  </h2>
+                  <div className="h-64 flex justify-center items-center border-gray-300 rounded">         
+                    {consumptionData ? (
+                        <SimpleBarChart data={consumptionData}/>
+                      ) : 
+                      (
+                        <p className="text-gray-400">No data to show</p>
+                      )
+                    }
+                  </div>
+                </div>
+
+                <div className="bg-white shadow rounded-lg p-6 col-span-1 md:col-span-2">
+                  <h2 className="text-lg font-semibold text-gray-700 mb-4">
+                    Average price paid for certificates
                   </h2>
                   <div className="h-64 flex justify-center items-center border-gray-300 rounded">
-                    <SimpleBarChart data={consumptionData}/>
-                  </div>
-                </div>
-
-                <div className="bg-white shadow rounded-lg p-6 col-span-1 md:col-span-2">
-                  <h2 className="text-lg font-semibold text-gray-700 mb-4">
-                    Price paid for last certificates
-                  </h2>
-                  <div className="h-64 flex justify-center items-center border border-dashed border-gray-300 rounded">
-                    <p className="text-gray-400">Placeholder for Chart 4</p>
+                  {transactionData && !transactionLoading ? (
+                        <SimpleLineChart data={transactionData}/>
+                      ) : 
+                      (
+                        <p className="text-gray-400"> {transactionLoading ? 'Loading....' : 'No data to show'}</p>
+                      )
+                    }
                   </div>
                 </div>
               </div>
