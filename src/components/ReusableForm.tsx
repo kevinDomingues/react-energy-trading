@@ -24,6 +24,7 @@ interface Option {
     successMessage?: string;
     loading?: boolean;
     buttonText?: string;
+    isSecondary?: boolean;
   }
   
   const ReusableForm: FC<ReusableFormProps> = ({
@@ -34,9 +35,10 @@ interface Option {
     successMessage,
     loading = false,
     buttonText = 'Submit',
+    isSecondary = false
   }) => {
     return (
-      <form onSubmit={onSubmit} className="max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
+      <form onSubmit={onSubmit} className={`max-w-md mx-auto bg-white ${!isSecondary && "shadow-md" } rounded-lg p-6`}>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         {successMessage && <p className="text-green-500 text-center mb-4">{successMessage}</p>}
   

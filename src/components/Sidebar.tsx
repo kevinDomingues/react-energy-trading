@@ -26,10 +26,10 @@ const Sidebar: FC = () => {
       <>
         <div className={`${open ? "w-72" : "w-20" } min-h-screen min-h-full bg-emerald-800 p-5 pt-8 relative duration-300`}>
           {open ? 
-            <ChevronLeftIcon className={`absolute cursor-pointer -right-3 top-9 w-7 border-sky-900 bg-white text-sky-900
+            <ChevronLeftIcon className={`absolute cursor-pointer -right-3 top-9 w-7 border-emerald-900 bg-white text-emerald-900
             border-2 rounded-full`} onClick={() => setOpen(!open)}/> 
             :
-            <ChevronRightIcon className={`absolute cursor-pointer -right-3 top-9 w-7 border-sky-900 bg-white text-sky-900
+            <ChevronRightIcon className={`absolute cursor-pointer -right-3 top-9 w-7 border-emerald-900 bg-white text-emerald-900
             border-2 rounded-full`} onClick={() => setOpen(!open)}/>
           }
           <div className={`flex gap-x-4 items-center`}>

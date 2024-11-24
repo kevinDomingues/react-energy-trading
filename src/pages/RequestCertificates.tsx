@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../providers/AuthProvider';
-import { apiURL } from '../constants/apiURL';
+import { apiURL, mockServerURL } from '../constants/apiURL';
 import ReusableForm from '../components/ReusableForm';
 import CertificateModal from '../components/CertificateModal';
 import { getEnergyTypeKey } from '../constants/consumptionUtils';
@@ -40,6 +40,7 @@ const RequestCertificate: FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [price, setPrice] = useState(0);
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
@@ -168,6 +169,22 @@ const RequestCertificate: FC = () => {
     }
   };
 
+  const getPredictedPrice = async (quantity: number) => {
+    const availableQuantity = data.length;
+    try {
+      const response = await axios.post(`${mockServerURL}/calculate-price`, 
+        {
+          quantity: quantity,
+          availability: availableQuantity
+        },
+    );
+      return response.data.price;
+    } catch (error) {
+      setError("Failed to load data");
+      return 0;
+    }
+  }
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-semibold mb-6 text-center">Request Energy Certificates</h1>
@@ -211,6 +228,7 @@ const RequestCertificate: FC = () => {
           onClose={handleCloseModal}
           onSubmit={handleBuySubmit}
           loading={loading}
+          getPrice={getPredictedPrice}
         />
       </div>
       ) : (

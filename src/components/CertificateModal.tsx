@@ -1,17 +1,19 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import ReusableForm from './ReusableForm';
 
 interface CertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (formData: any) => void;
+  getPrice: (quantity: number) => Promise<number>;
   loading: boolean;
 }
 
-const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit, loading }) => {
+const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit, loading, getPrice }) => {
   const [formData, setFormData] = useState({
     quantity: 1
   });
+  const [price, setPrice] = useState(0);
 
   const fields = [
     {
@@ -34,6 +36,23 @@ const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit
     onSubmit(formData);
   };
 
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (formData.quantity != null) {
+        try {
+          const price = await getPrice(formData.quantity);
+          if (price != null && price !== 0) {
+            setPrice(price);
+          }
+        } catch (err) {
+          console.log(err)
+        }
+      }
+    }
+
+    fetchPrice();
+  }, [formData.quantity])
+
   if (!isOpen) return null;
 
   return (
@@ -43,6 +62,16 @@ const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit
           &times;
         </button>
         <h2 className="text-2xl font-semibold text-center mb-4">Buy Energy Certificate</h2>
+        <div className="max-w-md mx-auto mb-4 px-6">
+          <label className="block text-gray-700">Expected average energy price</label>
+            <input
+              type={'text'}
+              name={"price"}
+              value={price}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none"
+              disabled
+            />
+        </div>
 
         <ReusableForm
           fields={fields}
@@ -51,7 +80,8 @@ const CertificateModal: FC<CertificateModalProps> = ({ isOpen, onClose, onSubmit
           error={''}
           successMessage={''}
           loading={loading}
-          buttonText="Create Certificate"
+          buttonText="Buy"
+          isSecondary={true}
         />
       </div>
     </div>
